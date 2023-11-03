@@ -29,7 +29,7 @@ module if_neuron(
 endmodule
 
 
-module two_layer_if_network(
+module manjushettar(
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
     input  wire [7:0] uio_in,
