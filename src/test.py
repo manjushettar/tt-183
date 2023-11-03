@@ -4,10 +4,11 @@ from cocotb.triggers import RisingEdge, ClockCycles
 from cocotb.binary import BinaryValue
 
 async def reset(dut):
-    dut.rst_n <= 0
+    dut.rst_n.value = 0
     await ClockCycles(dut.clk, 5)
-    dut.rst_n <= 1
+    dut.rst_n.value = 1
     await ClockCycles(dut.clk, 5)
+
 
 @cocotb.test()
 async def test_no_spike(dut):
@@ -17,8 +18,8 @@ async def test_no_spike(dut):
     await reset(dut)
 
     # Set inputs below threshold
-    dut.ui_in <= BinaryValue("00000000")
-    dut.uio_in <= BinaryValue("00000000")
+    dut.ui_in.value = BinaryValue("00000000")
+    dut.uio_in.value = BinaryValue("00000000")
 
     await ClockCycles(dut.clk, 100)
 
@@ -30,8 +31,8 @@ async def test_spike(dut):
     await reset(dut)
 
     spike_value = BinaryValue("11111111")
-    dut.ui_in <= spike_value
-    dut.uio_in <= spike_value
+    dut.ui_in = spike_value
+    dut.uio_in = spike_value
 
     await ClockCycles(dut.clk, 100)
 
