@@ -1,48 +1,39 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, FallingEdge, Timer, ClockCycles
+from cocotb.triggers import RisingEdge, ClockCycles
+from cocotb.binary import BinaryValue
 
-
-segments = [ 63, 6, 91, 79, 102, 109, 124, 7, 127, 103 ]
+async def reset(dut):
+    dut.rst_n <= 0
+    await ClockCycles(dut.clk, 5)
+    dut.rst_n <= 1
+    await ClockCycles(dut.clk, 5)
 
 @cocotb.test()
-async def test_7seg(dut):
-    dut._log.info("start")
-    clock = Clock(dut.clk, 10, units="us")
+async def test_no_spike(dut):
+    clock = Clock(dut.clk, 10, units="ns")
     cocotb.start_soon(clock.start())
+    
+    await reset(dut)
 
-    # reset
-    dut._log.info("reset")
-    dut.rst_n.value = 0
-    # set the compare value
-    dut.ui_in.value = 1
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
+    # Set inputs below threshold
+    dut.ui_in <= BinaryValue("00000000")
+    dut.uio_in <= BinaryValue("00000000")
 
-    # the compare value is shifted 10 bits inside the design to allow slower counting
-    max_count = dut.ui_in.value << 10
-    dut._log.info(f"check all segments with MAX_COUNT set to {max_count}")
-    # check all segments and roll over
-    for i in range(15):
-        dut._log.info("check segment {}".format(i))
-        await ClockCycles(dut.clk, max_count)
-        assert int(dut.segments.value) == segments[i % 10]
+    await ClockCycles(dut.clk, 100)
 
-        # all bidirectionals are set to output
-        assert dut.uio_oe == 0xFF
+    # Check that no spikes occurred
+    assert dut.uo_out.value.binstr == "00000000", "Spikes incorrectly generated"
 
-    # reset
-    dut.rst_n.value = 0
-    # set a different compare value
-    dut.ui_in.value = 3
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
+@cocotb.test()
+async def test_spike(dut):
+    await reset(dut)
 
-    max_count = dut.ui_in.value << 10
-    dut._log.info(f"check all segments with MAX_COUNT set to {max_count}")
-    # check all segments and roll over
-    for i in range(15):
-        dut._log.info("check segment {}".format(i))
-        await ClockCycles(dut.clk, max_count)
-        assert int(dut.segments.value) == segments[i % 10]
+    spike_value = BinaryValue("11111111")
+    dut.ui_in <= spike_value
+    dut.uio_in <= spike_value
 
+    await ClockCycles(dut.clk, 100)
+
+    spikes = dut.uo_out.value.binstr[-2:]
+    assert spikes == "11", "Spikes were not generated as expected"
