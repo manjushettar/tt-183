@@ -7,6 +7,7 @@ project:
 # Source files must be in ./src and you must list each source file separately
   source_files:        
     - if_network.v
+    - tt_um_seven_segment_seconds.v
   top_module:  "tt_um_manjushettar"      # Put the name of your top module here, must start with "tt_um_". Make it unique by including your github username
 
 # How many tiles your design occupies? A single tile is about 167x108 uM.
@@ -53,6 +54,8 @@ documentation:
     - "output_layer2[1]": "Spiking status of the first neuron in the second layer"
     - "output_layer2[0]": "Spiking status of the second neuron in the second layer"
 
+  bidirectional:
+  - uio_in: "Reserved for future use."
 
 # The following fields are optional
   tag:          ""      # comma separated list of tags: test, encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,
