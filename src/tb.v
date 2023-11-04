@@ -17,11 +17,11 @@ module tb ();
     end
 
     // wire up the inputs and outputs
-    reg  clk;
-    reg  rst_n;
-    reg  ena;
-    reg  [7:0] ui_in;
-    reg  [7:0] uio_in;
+    reg clk;
+    reg rst_n;
+    reg ena;
+    reg [7:0] ui_in;
+    reg [7:0] uio_in;
 
     wire [6:0] segments = uo_out[6:0];
     wire [7:0] uo_out;
