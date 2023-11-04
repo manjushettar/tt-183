@@ -4,9 +4,9 @@ from cocotb.triggers import RisingEdge, ClockCycles
 from cocotb.binary import BinaryValue
 
 async def reset(dut):
-    dut.rst_n <= 0
+    dut.rst_n = 0
     await ClockCycles(dut.clk, 5)
-    dut.rst_n <= 1
+    dut.rst_n = 1
     await ClockCycles(dut.clk, 5)
 
 @cocotb.test()
