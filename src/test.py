@@ -27,14 +27,13 @@ async def test_no_spike(dut):
 async def test_spike(dut):
     clock = Clock(dut.clk, 10, units="ns")
     cocotb.start_soon(clock.start())
-    
     await reset(dut)
 
-    dut.ui_in = BinaryValue("00000001")
-    dut.uio_in = BinaryValue("00000000")
-
+    dut.ui_in <= BinaryValue("10000000")
     await ClockCycles(dut.clk, 1)
 
+    await ClockCycles(dut.clk, 10)
+
     spike = dut.uo_out.value.binstr[-2:]
-    assert spike == "01", f"Single spike not generated as expected, output was {spike}"
+    assert dut.uo_out.value.binstr == "00000001", f"Expected a single spike, got {dut.uo_out.value.binstr}"
     
