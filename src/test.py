@@ -16,13 +16,11 @@ async def test_no_spike(dut):
     
     await reset(dut)
 
-    # Set inputs below threshold
-    dut.ui_in <= BinaryValue("00000000")
-    dut.uio_in <= BinaryValue("00000000")
+    dut.ui_in = BinaryValue("00000000")
+    dut.uio_in = BinaryValue("00000000")
 
     await ClockCycles(dut.clk, 100)
 
-    # Check that no spikes occurred
     assert dut.uo_out.value.binstr == "00000000", "Spikes incorrectly generated"
 
 @cocotb.test()
