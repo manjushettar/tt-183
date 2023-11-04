@@ -4,9 +4,9 @@ from cocotb.triggers import RisingEdge, ClockCycles
 from cocotb.binary import BinaryValue
 
 async def reset(dut):
-    dut.rst_n = 0
+    dut.rst_n <= 0
     await ClockCycles(dut.clk, 5)
-    dut.rst_n = 1
+    dut.rst_n <= 1
     await ClockCycles(dut.clk, 5)
 
 @cocotb.test()
@@ -16,22 +16,27 @@ async def test_no_spike(dut):
     
     await reset(dut)
 
+    # Set inputs below threshold
     dut.ui_in <= BinaryValue("00000000")
     dut.uio_in <= BinaryValue("00000000")
 
     await ClockCycles(dut.clk, 100)
 
+    # Check that no spikes occurred
     assert dut.uo_out.value.binstr == "00000000", "Spikes incorrectly generated"
 
 @cocotb.test()
 async def test_spike(dut):
+    clock = Clock(dut.clk, 10, units="ns")
+    cocotb.start_soon(clock.start())
+    
     await reset(dut)
 
-    spike_value = BinaryValue("11111111")
-    dut.ui_in <= spike_value
-    dut.uio_in <= spike_value
+    dut.ui_in = BinaryValue("00000001")
+    dut.uio_in = BinaryValue("00000000")
 
-    await ClockCycles(dut.clk, 100)
+    await ClockCycles(dut.clk, 1)
 
-    spikes = dut.uo_out.value.binstr[-2:]
-    assert spikes == "11", "Spikes were not generated as expected"
+    spike = dut.uo_out.value.binstr[-2:]
+    assert spike == "01", f"Single spike not generated as expected, output was {spike}"
+    
