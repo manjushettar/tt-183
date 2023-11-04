@@ -3,14 +3,11 @@ from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, ClockCycles
 from cocotb.binary import BinaryValue
 
-THRESHOLD = 0x8000 
-
 async def reset(dut):
-    dut.rst_n.value = 0
+    dut.rst_n <= 0
     await ClockCycles(dut.clk, 5)
-    dut.rst_n.value = 1
+    dut.rst_n <= 1
     await ClockCycles(dut.clk, 5)
-
 
 @cocotb.test()
 async def test_no_spike(dut):
@@ -20,8 +17,8 @@ async def test_no_spike(dut):
     await reset(dut)
 
     # Set inputs below threshold
-    dut.ui_in.value = BinaryValue("00000000")
-    dut.uio_in.value = BinaryValue("00000000")
+    dut.ui_in <= BinaryValue("00000000")
+    dut.uio_in <= BinaryValue("00000000")
 
     await ClockCycles(dut.clk, 100)
 
@@ -30,14 +27,16 @@ async def test_no_spike(dut):
 
 @cocotb.test()
 async def test_spike(dut):
-    dut.rst_n.value = 0
-    await RisingEdge(dut.clk)
-    dut.rst_n.value = 1
-    await RisingEdge(dut.clk)
+    clock = Clock(dut.clk, 10, units="ns")
+    cocotb.start_soon(clock.start())
     
-    dut.spike_current.value = THRESHOLD + 1
-    
-    await RisingEdge(dut.clk)
-    
-    assert dut.spike.value == 1, "Expected a spike when current exceeds the threshold"
+    await reset(dut)
+
+    dut.ui_in <= BinaryValue("00000001")
+    dut.uio_in <= BinaryValue("00000000")
+
+    await ClockCycles(dut.clk, 1)
+
+    spike = dut.uo_out.value.binstr[-2:]
+    assert spike == "01", f"Single spike not generated as expected, output was {spike}"
     
