@@ -33,7 +33,7 @@ async def test_spike(dut):
     dut.ui_in.value = BinaryValue("10000001")
     dut.uio_in.value = BinaryValue("00000000")
 
-    await ClockCycles(dut.clk, 1)
+    await ClockCycles(dut.clk, 5)
 
     spike = dut.uo_out.value.binstr[-2:]
     assert spike == "01", f"Single spike not generated as expected, output was {spike}"
