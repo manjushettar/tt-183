@@ -30,7 +30,7 @@ async def test_spike(dut):
     
     await reset(dut)
 
-    dut.ui_in.value = BinaryValue("10000001")
+    dut.ui_in.value = BinaryValue("11111111")
     dut.uio_in.value = BinaryValue("00000000")
 
     await ClockCycles(dut.clk, 5)

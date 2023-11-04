@@ -5,7 +5,7 @@ module if_neuron(
     output reg spike
 );
 
-    parameter THRESHOLD = 16'h8000;
+    parameter THRESHOLD = 16'h0100;
     parameter RESET_CURRENT = 16'h0000;
 
     reg [15:0] accumulated_current;
